@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Listening History</title>
+
+    <style>
+        body {
+            background: #0f0f0f;
+            color: white;
+            font-family: Arial;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            padding: 30px;
+        }
+
+        h1 {
+            color: #1DB954;
+            text-align: center;
+        }
+
+        .card {
+            background: #181818;
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 10px;
+        }
+
+        .nav a {
+            color: #1DB954;
+            margin-right: 10px;
+            text-decoration: none;
+        }
+
+        .small {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🎧 Listening History</h1>
+
+    <div class="nav">
+        <a href="/">Dashboard</a>
+        <a href="/history">History</a>
+    </div>
+
+    {% for song, artist, time in data %}
+
+        <div class="card">
+            <b>{{ song }}</b> - {{ artist }}
+            <div class="small">{{ time }}</div>
+        </div>
+
+    {% endfor %}
+
+</div>
+
+</body>
+
+</html>

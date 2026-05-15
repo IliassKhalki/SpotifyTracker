@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Spotify Tracker</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+            background: linear-gradient(180deg, #0a0a0a, #111);
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1DB954;
+            font-size: 34px;
+            margin-bottom: 30px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .stat {
+            flex: 1;
+            min-width: 150px;
+            background: #181818;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 22px;
+            color: #1DB954;
+            font-weight: bold;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: #181818;
+            border-radius: 14px;
+            padding: 18px;
+        }
+
+        .title {
+            color: #1DB954;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            padding: 6px 0;
+            border-bottom: 1px solid #2a2a2a;
+            font-size: 14px;
+        }
+
+        .chart-box {
+            height: 320px;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .nav {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .nav a {
+            color: #1DB954;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🎧 Spotify Tracker Dashboard</h1>
+
+    <div class="nav">
+        <a href="/">Dashboard</a>
+        <a href="/history">History</a>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats">
+        <div class="stat">
+            <div class="stat-number">{{ total }}</div>
+            <div>Total Plays</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-number">{{ songs }}</div>
+            <div>Unique Songs</div>
+        </div>
+
+        <div class="stat">
+            <div class="stat-number">{{ artists }}</div>
+            <div>Unique Artists</div>
+        </div>
+    </div>
+
+    <div class="grid">
+
+        <!-- TOP TRACKS -->
+        <div class="card">
+            <div class="title">🔥 Top Tracks</div>
+            <ul>
+                {% for song, artist, count in top_tracks %}
+                    <li>{{ song }} - {{ artist }} ({{ count }})</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- TOP ARTISTS -->
+        <div class="card">
+            <div class="title">🎤 Top Artists</div>
+            <ul>
+                {% for artist, count in top_artists %}
+                    <li>{{ artist }} ({{ count }})</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- TRACKS CHART -->
+        <div class="card chart-box">
+            <div class="title">📊 Top Tracks Chart</div>
+            <canvas id="tracksChart"></canvas>
+        </div>
+
+        <!-- DAILY CHART -->
+        <div class="card chart-box">
+            <div class="title">📅 Daily Listening (Last 7 days)</div>
+            <canvas id="dailyChart"></canvas>
+        </div>
+
+        <!-- HOURLY CHART -->
+        <div class="card chart-box">
+            <div class="title">🕒 Hourly Listening Pattern</div>
+            <canvas id="hourlyChart"></canvas>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+/* ---------------- TOP TRACKS ---------------- */
+const tracksCtx = document.getElementById("tracksChart");
+
+new Chart(tracksCtx, {
+    type: "bar",
+    data: {
+        labels: {{ track_labels | tojson }},
+        datasets: [{
+            label: "Plays",
+            data: {{ track_values | tojson }},
+            backgroundColor: "#1DB954"
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+});
+
+
+/* ---------------- DAILY CHART ---------------- */
+const dailyCtx = document.getElementById("dailyChart");
+
+new Chart(dailyCtx, {
+    type: "line",
+    data: {
+        labels: {{ daily_labels | tojson }},
+        datasets: [{
+            label: "Daily Plays",
+            data: {{ daily_values | tojson }},
+            borderColor: "#1DB954",
+            fill: false
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+});
+
+
+/* ---------------- HOURLY CHART ---------------- */
+const hourlyCtx = document.getElementById("hourlyChart");
+
+new Chart(hourlyCtx, {
+    type: "bar",
+    data: {
+        labels: {{ hourly_labels | tojson }},
+        datasets: [{
+            label: "Hourly Plays",
+            data: {{ hourly_values | tojson }},
+            backgroundColor: "#1DB954"
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+});
+</script>
+
+</body>
+</html>
