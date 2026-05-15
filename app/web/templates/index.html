@@ -195,9 +195,18 @@ new Chart(tracksCtx, {
         }]
     },
     options: {
-        responsive: true,
-        maintainAspectRatio: false
+    responsive: true,
+    maintainAspectRatio: false,
+
+    scales: {
+        x: {
+            ticks: {
+                maxRotation: 25,
+                minRotation: 25
+            }
+        }
     }
+}
 });
 
 
