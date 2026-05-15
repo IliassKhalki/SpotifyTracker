@@ -2,6 +2,9 @@
 
 A personal analytics dashboard that tracks your Spotify listening habits using the Spotify Web API. Think of it as a continuous, self-hosted Spotify Wrapped — updated in real time instead of once a year.
 
+CHECK IT YOURSELF, ALWAYS OPEN FOR FEEDBACK 
+ITS LIVE https://spotifytracker-production-96b1.up.railway.app/
+
 Built with **Python**, **Flask**, and **SQLite**.
 
 ---
