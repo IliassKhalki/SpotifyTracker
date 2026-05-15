@@ -11,3 +11,4 @@ data/
 spotify_tracker.db
 
 .DS_Store
+*.cache
