@@ -202,10 +202,9 @@ git push
 
 ## Deploy On Vercel
 
-This repository includes Vercel adapter files:
+This repository includes a Vercel entry file:
 
-- `api/index.py` exposes the Flask app as a Python serverless function.
-- `vercel.json` routes all requests to that function and excludes local-only files from the function bundle.
+- `index.py` exposes the Flask app for Vercel's Python/Flask runtime.
 
 In Vercel:
 
