@@ -163,7 +163,11 @@ def _current_user():
     if not spotify:
         return None
 
-    profile = spotify.current_user()
+    try:
+        profile = spotify.current_user()
+    except spotipy.SpotifyException:
+        return None
+
     user = {
         "id": profile["id"],
         "display_name": profile.get("display_name") or profile["id"],
@@ -236,6 +240,17 @@ def _require_login():
     if session.get("token_key") not in TOKEN_STORE:
         return redirect(url_for("login"))
     return None
+
+
+@app.route("/health")
+def health():
+    return jsonify({
+        "ok": True,
+        "spotify_client_id_configured": bool(os.getenv("SPOTIPY_CLIENT_ID") or os.getenv("SPOTIFY_CLIENT_ID")),
+        "spotify_client_secret_configured": bool(os.getenv("SPOTIPY_CLIENT_SECRET") or os.getenv("SPOTIFY_CLIENT_SECRET")),
+        "spotify_redirect_uri": os.getenv("SPOTIPY_REDIRECT_URI") or os.getenv("SPOTIFY_REDIRECT_URI"),
+        "vercel": bool(os.getenv("VERCEL")),
+    })
 
 
 @app.route("/")
@@ -312,6 +327,9 @@ def sync_now():
         return jsonify({"ok": False, "error": "not_authenticated"}), 401
 
     user = _current_user()
+    if not user:
+        return jsonify({"ok": False, "error": "spotify_profile_unavailable"}), 401
+
     synced = _sync_recent_tracks()
     total, songs, artists = get_summary_stats(user["id"])
     recent = get_recent_history(8, user["id"])
@@ -377,6 +395,9 @@ def history():
         return login_redirect
 
     user = _current_user()
+    if not user:
+        return redirect(url_for("logout"))
+
     data = get_recent_history(75, user["id"])
 
     return render_template(
