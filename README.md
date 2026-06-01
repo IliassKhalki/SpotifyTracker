@@ -1,107 +1,59 @@
-# 🎧 Spotify Listening Tracker
+# Spotify Tracker
 
-A personal analytics dashboard that tracks your Spotify listening habits using the Spotify Web API. Think of it as a continuous, self-hosted Spotify Wrapped — updated in real time instead of once a year.
+A private Spotify listening analytics app built with Python, Flask, SQLite, Spotipy, and Chart.js.
 
-CHECK IT YOURSELF, ALWAYS OPEN FOR FEEDBACK 
-ITS LIVE https://spotifytracker-production-96b1.up.railway.app/
-
-Built with **Python**, **Flask**, and **SQLite**.
-
----
+Spotify Tracker lets a logged-in Spotify user sync recently played tracks, view album artwork, see artist cards, and browse listening patterns over time.
 
 ## Features
 
-- 🔐 Spotify OAuth authentication
-- 🎵 Automatic fetching of recently played tracks
-- 📊 Play count tracking per song and artist
-- 📅 Daily listening activity analytics
-- 🕒 Hourly listening pattern insights
-- 📈 Interactive charts dashboard powered by Chart.js
-- 📜 Full listening history page
-- 💾 Local SQLite database — no external DB required
+- Spotify login with OAuth
+- Recently played track sync
+- Auto-sync polling from the dashboard
+- Per-user listening history
+- Album artwork and primary artist images
+- Top tracks, top artists, daily plays, and hourly listening charts
+- SQLite storage for local development
 
----
+## Setup
 
-## Tech Stack
-
-| Layer | Technology |
-|---|---|
-| Backend | Python, Flask |
-| Spotify Integration | Spotipy (Spotify Web API) |
-| Database | SQLite |
-| Frontend | HTML, CSS, Jinja2, Chart.js |
-
----
-
-## Project Structure
-
-```
-SpotifyTracker/
-├── app/
-│   ├── web/          # Flask frontend (routes, templates)
-│   ├── database/     # SQLite logic & queries
-│   ├── spotify/      # Spotify API client
-│   └── main.py       # Data collector (run this to track)
-├── data/             # Local database — ignored in git
-├── .gitignore
-├── requirements.txt
-└── README.md
-```
-
----
-
-## Getting Started
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/IliassKhalki/SpotifyTracker.git
-cd SpotifyTracker
-```
-
-### 2. Install dependencies
+Install dependencies:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 3. Set up Spotify API credentials
-
-Go to the [Spotify Developer Dashboard](https://developer.spotify.com/dashboard), create an app, and set the redirect URI to `http://127.0.0.1:8888/callback`.
-
-Then create a `.env` file in the project root:
+Create a `.env` file in the project root:
 
 ```env
 SPOTIPY_CLIENT_ID=your_client_id
 SPOTIPY_CLIENT_SECRET=your_client_secret
-SPOTIPY_REDIRECT_URI=http://127.0.0.1:8888/callback
+SPOTIPY_REDIRECT_URI=http://127.0.0.1:5050/callback
+FLASK_SECRET_KEY=replace_with_a_long_random_secret
 ```
 
-### 4. Start the tracker
+In the Spotify Developer Dashboard, add the same redirect URI:
 
-This runs in the background and periodically fetches your recently played tracks:
-
-```bash
-python -m app.main
+```text
+http://127.0.0.1:5050/callback
 ```
 
-### 5. Launch the dashboard
+Run the web app:
 
 ```bash
 python -m app.web.app
 ```
 
-Open your browser and go to: **http://127.0.0.1:5000**
+Open:
 
----
+```text
+http://127.0.0.1:5050
+```
 
 ## Security Notes
 
-- The `.env` file and `.cache` (Spotipy token) are both excluded from version control via `.gitignore` — never commit them.
-- The `data/` folder (your SQLite database) is also gitignored since it contains personal listening history.
-
----
-
-## Project Goal
-
-This project was built to analyze personal Spotify listening habits and visualize music behavior over time — a lightweight, self-hosted alternative to Spotify Wrapped with continuous tracking.
+- Do not commit `.env`, `.cache`, database files, or log files.
+- Set `FLASK_SECRET_KEY` in production. If it is missing, the app generates a temporary key at startup.
+- Spotify tokens are stored server-side for the current app process, not inside the browser session cookie.
+- Session cookies are HTTP-only and SameSite=Lax.
+- The dashboard auto-sync endpoint uses a CSRF token.
+- For a production multi-worker deployment, move the token store from memory to Redis, a database, or another server-side session store.

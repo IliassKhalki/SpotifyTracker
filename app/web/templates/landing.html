@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Tracker</title>
+    <style>
+        :root {
+            --bg: #070806;
+            --ink: #f4f1e8;
+            --muted: #a9ad9e;
+            --soft: rgba(244, 241, 232, 0.08);
+            --line: rgba(244, 241, 232, 0.12);
+            --green: #1ed760;
+            --mint: #9af7c1;
+            --blue: #8bd3ff;
+            --pink: #ff8aa6;
+            --gold: #f7c66a;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 12% 10%, rgba(30, 215, 96, 0.18), transparent 28%),
+                radial-gradient(circle at 86% 14%, rgba(139, 211, 255, 0.16), transparent 28%),
+                linear-gradient(135deg, #070806 0%, #10140f 52%, #08090d 100%);
+            color: var(--ink);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        a { color: inherit; }
+
+        .shell {
+            width: min(1180px, calc(100% - 32px));
+            min-height: 100vh;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            padding: 22px 0;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 900;
+        }
+
+        .brand-mark {
+            width: 48px;
+            height: 48px;
+            flex: 0 0 48px;
+            filter: drop-shadow(0 16px 30px rgba(30, 215, 96, 0.28));
+        }
+
+        .brand-mark svg { width: 100%; height: 100%; display: block; }
+
+        .brand-text {
+            display: grid;
+            line-height: 1.04;
+        }
+
+        .brand-text small {
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 800;
+            margin-top: 4px;
+        }
+
+        .button {
+            min-height: 46px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            border: 1px solid var(--line);
+            padding: 0 16px;
+            text-decoration: none;
+            font-weight: 950;
+            background: var(--soft);
+            transition: transform 150ms ease, background 150ms ease;
+        }
+
+        .button:hover { transform: translateY(-1px); }
+
+        .button-primary {
+            background: var(--green);
+            color: #061009;
+            border-color: transparent;
+        }
+
+        .hero {
+            flex: 1;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(340px, 0.86fr);
+            gap: 44px;
+            align-items: center;
+            padding: 38px 0 46px;
+        }
+
+        .kicker {
+            color: var(--mint);
+            font-size: 12px;
+            font-weight: 950;
+            letter-spacing: 0.11em;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        h1 {
+            max-width: 790px;
+            margin: 0;
+            font-size: clamp(46px, 7.4vw, 94px);
+            line-height: 0.94;
+            letter-spacing: 0;
+        }
+
+        .accent { color: var(--green); }
+
+        .lede {
+            max-width: 650px;
+            color: var(--muted);
+            font-size: 18px;
+            line-height: 1.75;
+            margin: 24px 0 0;
+        }
+
+        .cta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 34px;
+        }
+
+        .error {
+            color: var(--pink);
+            margin-top: 14px;
+            font-weight: 800;
+        }
+
+        .proof-strip {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 38px;
+            max-width: 690px;
+        }
+
+        .proof {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: rgba(244, 241, 232, 0.055);
+            padding: 14px;
+        }
+
+        .proof strong { display: block; font-size: 18px; }
+        .proof span { color: var(--muted); font-size: 13px; display: block; margin-top: 5px; }
+
+        .preview {
+            border: 1px solid rgba(30, 215, 96, 0.24);
+            border-radius: 8px;
+            background:
+                linear-gradient(135deg, rgba(30, 215, 96, 0.14), rgba(139, 211, 255, 0.08)),
+                rgba(19, 22, 18, 0.86);
+            padding: 16px;
+            box-shadow: 0 30px 90px rgba(0, 0, 0, 0.28);
+        }
+
+        .preview-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 14px;
+        }
+
+        .preview-top strong { font-size: 18px; }
+        .preview-top span { color: var(--muted); font-size: 13px; display: block; margin-top: 4px; }
+
+        .art-wall {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .album {
+            min-height: 168px;
+            border-radius: 8px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            overflow: hidden;
+            position: relative;
+            background:
+                radial-gradient(circle at 25% 20%, rgba(255, 255, 255, 0.24), transparent 20%),
+                linear-gradient(135deg, var(--green), #234d35 55%, #071008);
+        }
+
+        .album.two {
+            background:
+                radial-gradient(circle at 72% 18%, rgba(255, 255, 255, 0.28), transparent 18%),
+                linear-gradient(135deg, var(--blue), #19334e 58%, #090b10);
+        }
+
+        .album.three {
+            background:
+                radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.22), transparent 18%),
+                linear-gradient(135deg, var(--pink), #4f2432 58%, #0c090b);
+        }
+
+        .album strong { font-size: 18px; position: relative; }
+        .album span { color: rgba(244, 241, 232, 0.74); font-size: 13px; margin-top: 4px; position: relative; }
+
+        .album-side {
+            display: grid;
+            gap: 10px;
+        }
+
+        .preview-row {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: rgba(244, 241, 232, 0.06);
+            padding: 12px;
+            display: grid;
+            grid-template-columns: 46px minmax(0, 1fr);
+            gap: 10px;
+            align-items: center;
+        }
+
+        .dot-art {
+            width: 46px;
+            height: 46px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--gold), var(--green));
+        }
+
+        .dot-art.blue { background: linear-gradient(135deg, var(--blue), var(--pink)); }
+        .preview-row strong, .preview-row span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .preview-row span { color: var(--muted); font-size: 13px; margin-top: 3px; }
+
+        .site-footer {
+            border: 1px solid rgba(30, 215, 96, 0.22);
+            border-radius: 8px;
+            background:
+                linear-gradient(135deg, rgba(30, 215, 96, 0.13), rgba(139, 211, 255, 0.07)),
+                rgba(244, 241, 232, 0.05);
+            color: var(--ink);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin: 0 0 24px;
+            padding: 18px 20px;
+            font-size: 14px;
+        }
+
+        .site-footer strong { color: var(--green); }
+
+        .footer-badge {
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            color: var(--muted);
+            padding: 7px 11px;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 900px) {
+            .hero { grid-template-columns: 1fr; }
+            .proof-strip { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 620px) {
+            .nav, .site-footer { flex-direction: column; align-items: flex-start; }
+            .art-wall { grid-template-columns: 1fr; }
+            h1 { font-size: 44px; }
+        }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <nav class="nav">
+            <div class="brand">
+                <span class="brand-mark" aria-hidden="true">
+                    <svg viewBox="0 0 64 64" role="img">
+                        <defs>
+                            <linearGradient id="logoGradient" x1="10" y1="8" x2="54" y2="58">
+                                <stop stop-color="#1ed760"/>
+                                <stop offset="1" stop-color="#8bd3ff"/>
+                            </linearGradient>
+                        </defs>
+                        <rect width="64" height="64" rx="14" fill="url(#logoGradient)"/>
+                        <path d="M16 23c10-4 23-3 32 2" fill="none" stroke="#061009" stroke-width="4" stroke-linecap="round"/>
+                        <path d="M18 32c8-3 19-2 27 2" fill="none" stroke="#061009" stroke-width="4" stroke-linecap="round"/>
+                        <path d="M21 40c6-2 13-1 19 2" fill="none" stroke="#061009" stroke-width="4" stroke-linecap="round"/>
+                        <path d="M15 49h7l5-10 7 15 6-11h9" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
+                <span class="brand-text">Spotify Tracker<small>Listening diary</small></span>
+            </div>
+            <a class="button" href="/login">Log in</a>
+        </nav>
+
+        <section class="hero">
+            <div>
+                <div class="kicker">Secure music memory</div>
+                <h1>Give your Spotify history a <span class="accent">place to live.</span></h1>
+                <p class="lede">Spotify Tracker turns recent plays into a listening journal: cover art, artist portraits, favorites that keep returning, and patterns you can actually recognize.</p>
+                <div class="cta-row">
+                    <a class="button button-primary" href="/login">Continue with Spotify</a>
+                    <a class="button" href="#preview">See the feel</a>
+                </div>
+                {% if auth_error %}
+                    <p class="error">{{ auth_error }}</p>
+                {% endif %}
+                <div class="proof-strip">
+                    <div class="proof"><strong>Albums first</strong><span>Track cards use real cover art.</span></div>
+                    <div class="proof"><strong>Artists visible</strong><span>Portraits make the dashboard easier to scan.</span></div>
+                    <div class="proof"><strong>Built simply</strong><span>Flask, SQLite, private analytics.</span></div>
+                </div>
+            </div>
+
+            <aside class="preview" id="preview">
+                <div class="preview-top">
+                    <div>
+                        <strong>Your listening room</strong>
+                        <span>A warmer dashboard for real plays</span>
+                    </div>
+                </div>
+                <div class="art-wall">
+                    <div class="album">
+                        <strong>Late-night repeat</strong>
+                        <span>Top track card</span>
+                    </div>
+                    <div class="album-side">
+                        <div class="album two">
+                            <strong>Artist glow</strong>
+                            <span>Portrait card</span>
+                        </div>
+                        <div class="album three">
+                            <strong>Daily pulse</strong>
+                            <span>Listening chart</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="preview-row">
+                    <div class="dot-art"></div>
+                    <div>
+                        <strong>Recent plays with artwork</strong>
+                        <span>Album, artist, timestamp</span>
+                    </div>
+                </div>
+                <div class="preview-row">
+                    <div class="dot-art blue"></div>
+                    <div>
+                        <strong>History that feels browsable</strong>
+                        <span>Not just rows in a table</span>
+                    </div>
+                </div>
+            </aside>
+        </section>
+
+        <footer class="site-footer">
+            <span>Made, designed and developed by <strong>Iliass Khalki</strong>.</span>
+            <span class="footer-badge">Spotify Tracker</span>
+        </footer>
+    </main>
+</body>
+</html>
