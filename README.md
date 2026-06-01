@@ -200,6 +200,36 @@ Push to GitHub:
 git push
 ```
 
+## Deploy On Vercel
+
+This repository includes Vercel adapter files:
+
+- `api/index.py` exposes the Flask app as a Python serverless function.
+- `vercel.json` routes all requests to that function and excludes local-only files from the function bundle.
+
+In Vercel:
+
+1. Import the GitHub repository.
+2. Set the framework preset to `Other`.
+3. Leave the build command empty.
+4. Use `pip install -r requirements.txt` as the install command if Vercel asks for one.
+5. Add the environment variables from `.env.example`.
+
+For production Vercel, set:
+
+```env
+SPOTIPY_REDIRECT_URI=https://your-vercel-domain.vercel.app/callback
+SESSION_COOKIE_SECURE=true
+```
+
+Then add the same Vercel callback URL in the Spotify Developer Dashboard:
+
+```text
+https://your-vercel-domain.vercel.app/callback
+```
+
+Vercel is serverless, so SQLite files and in-memory token storage are not durable there. This setup is good for a portfolio demo. For a real multi-user production version, use hosted storage such as Postgres/Supabase for listening history and Redis or database-backed sessions for tokens.
+
 ## Security And Privacy
 
 This project is designed to avoid pushing private data to GitHub.
