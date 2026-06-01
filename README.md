@@ -59,28 +59,28 @@ The app does not need a global Spotify API key for everyone. Each user authorize
 
 ```text
 SpotifyTracker/
-├── app/
-│   ├── auth/
-│   │   └── spotify_auth.py       # Spotify OAuth setup
-│   ├── database/
-│   │   ├── db.py                 # SQLite schema and write helpers
-│   │   └── queries.py            # Dashboard/history read queries
-│   ├── spotify/
-│   │   ├── auth.py               # Legacy Spotify auth helpers
-│   │   └── client.py             # Legacy Spotify client helpers
-│   └── web/
-│       ├── app.py                # Flask routes, sync API, security headers
-│       └── templates/
-│           ├── landing.html      # Public landing page
-│           ├── index.html        # Logged-in dashboard
-│           └── history.html      # Listening history page
-├── data/                         # Local SQLite database, ignored by Git
-├── .env.example                  # Safe environment template
-├── .gitignore                    # Keeps secrets/runtime files out of Git
-├── requirements.txt              # Python dependencies
-├── wsgi.py                       # WSGI entry point
-├── LICENSE
-└── README.md
+|-- app/
+|   |-- auth/
+|   |   `-- spotify_auth.py       # Spotify OAuth setup
+|   |-- database/
+|   |   |-- db.py                 # SQLite schema and write helpers
+|   |   `-- queries.py            # Dashboard/history read queries
+|   |-- spotify/
+|   |   |-- auth.py               # Legacy Spotify auth helpers
+|   |   `-- client.py             # Legacy Spotify client helpers
+|   `-- web/
+|       |-- app.py                # Flask routes, sync API, security headers
+|       `-- templates/
+|           |-- landing.html      # Public landing page
+|           |-- index.html        # Logged-in dashboard
+|           `-- history.html      # Listening history page
+|-- data/                         # Local SQLite database, ignored by Git
+|-- .env.example                  # Safe environment template
+|-- .gitignore                    # Keeps secrets/runtime files out of Git
+|-- requirements.txt              # Python dependencies
+|-- wsgi.py                       # WSGI entry point
+|-- LICENSE
+`-- README.md
 ```
 
 ## Local Setup
@@ -88,7 +88,7 @@ SpotifyTracker/
 Clone the repository:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/SpotifyTracker.git
+git clone https://github.com/IliassKhalki/SpotifyTracker.git
 cd SpotifyTracker
 ```
 
@@ -122,7 +122,7 @@ Create your local environment file:
 cp .env.example .env
 ```
 
-On Windows PowerShell, use:
+On Windows PowerShell:
 
 ```powershell
 Copy-Item .env.example .env
@@ -166,7 +166,7 @@ Open:
 http://127.0.0.1:5050/
 ```
 
-After logging in with Spotify, the app will redirect back to:
+After logging in with Spotify, the app redirects back to:
 
 ```text
 http://127.0.0.1:5050/callback
@@ -198,14 +198,6 @@ Push to GitHub:
 
 ```bash
 git push
-```
-
-If the repository has no remote yet:
-
-```bash
-git remote add origin https://github.com/YOUR_USERNAME/SpotifyTracker.git
-git branch -M main
-git push -u origin main
 ```
 
 ## Security And Privacy
