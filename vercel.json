@@ -8,7 +8,7 @@
     }
   ],
   "functions": {
-    "api/**/*.py": {
+    "api/index.py": {
       "excludeFiles": "{data/**,.cache,.env,.vscode/**,app/.venv/**,**/__pycache__/**,*.log}"
     }
   }
