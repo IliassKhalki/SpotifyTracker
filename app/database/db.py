@@ -1,9 +1,14 @@
+import os
 import sqlite3
 from pathlib import Path
 
 
 BASE_DIR = Path(__file__).resolve().parents[2]
-DATABASE_PATH = BASE_DIR / "data" / "spotify_tracker.db"
+DATABASE_PATH = (
+    Path("/tmp") / "spotify_tracker.db"
+    if os.getenv("VERCEL")
+    else BASE_DIR / "data" / "spotify_tracker.db"
+)
 
 
 def create_connection():

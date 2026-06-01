@@ -230,6 +230,8 @@ https://your-vercel-domain.vercel.app/callback
 
 Vercel is serverless, so SQLite files and in-memory token storage are not durable there. This setup is good for a portfolio demo. For a real multi-user production version, use hosted storage such as Postgres/Supabase for listening history and Redis or database-backed sessions for tokens.
 
+On Vercel, the app stores the temporary SQLite database at `/tmp/spotify_tracker.db` so serverless functions can write to it during a demo session. Local development still uses `data/spotify_tracker.db`.
+
 ## Security And Privacy
 
 This project is designed to avoid pushing private data to GitHub.
