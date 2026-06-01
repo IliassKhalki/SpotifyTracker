@@ -1,22 +1,25 @@
-from spotipy.oauth2 import SpotifyOAuth
-from dotenv import load_dotenv
 import os
 from pathlib import Path
 
-# FORCE LOAD .env FROM PROJECT ROOT
+from dotenv import load_dotenv
+from spotipy.cache_handler import MemoryCacheHandler
+from spotipy.oauth2 import SpotifyOAuth
+
+
 BASE_DIR = Path(__file__).resolve().parents[2]
 load_dotenv(dotenv_path=BASE_DIR / ".env")
 
 
 def get_spotify_oauth():
+    client_id = os.getenv("SPOTIPY_CLIENT_ID") or os.getenv("SPOTIFY_CLIENT_ID")
+    client_secret = os.getenv("SPOTIPY_CLIENT_SECRET") or os.getenv("SPOTIFY_CLIENT_SECRET")
+    redirect_uri = os.getenv("SPOTIPY_REDIRECT_URI") or os.getenv("SPOTIFY_REDIRECT_URI")
 
-    client_id = os.getenv("SPOTIPY_CLIENT_ID")
-    client_secret = os.getenv("SPOTIPY_CLIENT_SECRET")
-    redirect_uri = os.getenv("SPOTIPY_REDIRECT_URI")
-
-    # DEBUG CHECK (VERY IMPORTANT)
-    if not client_id or not client_secret:
-        raise Exception("❌ .env not loaded correctly")
+    if not client_id or not client_secret or not redirect_uri:
+        raise RuntimeError(
+            "Spotify credentials are missing. Add SPOTIPY_CLIENT_ID, "
+            "SPOTIPY_CLIENT_SECRET, and SPOTIPY_REDIRECT_URI to .env."
+        )
 
     return SpotifyOAuth(
         client_id=client_id,
@@ -25,6 +28,9 @@ def get_spotify_oauth():
         scope=(
             "user-read-recently-played "
             "user-top-read "
-            "user-read-email"
-        )
+            "user-read-private"
+        ),
+        cache_handler=MemoryCacheHandler(),
+        requests_timeout=8,
+        show_dialog=False,
     )

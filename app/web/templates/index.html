@@ -1,255 +1,832 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <title>Spotify Tracker</title>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Tracker Dashboard</title>
     <style>
+        :root {
+            --bg: #070806;
+            --ink: #f4f1e8;
+            --muted: #a9ad9e;
+            --soft: rgba(244, 241, 232, 0.08);
+            --line: rgba(244, 241, 232, 0.12);
+            --panel: rgba(19, 22, 18, 0.82);
+            --panel-solid: #121610;
+            --green: #1ed760;
+            --mint: #9af7c1;
+            --blue: #8bd3ff;
+            --pink: #ff8aa6;
+            --gold: #f7c66a;
+        }
+
+        * { box-sizing: border-box; }
+
         body {
             margin: 0;
-            font-family: Arial;
-            background: linear-gradient(180deg, #0a0a0a, #111);
-            color: white;
+            background:
+                radial-gradient(circle at 14% 6%, rgba(30, 215, 96, 0.16), transparent 32%),
+                radial-gradient(circle at 88% 12%, rgba(139, 211, 255, 0.13), transparent 26%),
+                linear-gradient(135deg, #070806 0%, #10140f 52%, #08090d 100%);
+            color: var(--ink);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: auto;
-            padding: 40px 20px;
-        }
+        a { color: inherit; text-decoration: none; }
 
-        h1 {
-            text-align: center;
-            color: #1DB954;
-            font-size: 34px;
-            margin-bottom: 30px;
-        }
-
-        .stats {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-        }
-
-        .stat {
-            flex: 1;
-            min-width: 150px;
-            background: #181818;
-            padding: 15px;
-            border-radius: 12px;
-            text-align: center;
-        }
-
-        .stat-number {
-            font-size: 22px;
-            color: #1DB954;
-            font-weight: bold;
-        }
-
-        .grid {
+        .app {
+            min-height: 100vh;
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            grid-template-columns: 250px minmax(0, 1fr);
         }
 
-        @media (max-width: 900px) {
-            .grid {
-                grid-template-columns: 1fr;
-            }
+        .sidebar {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            border-right: 1px solid var(--line);
+            background: rgba(6, 8, 6, 0.86);
+            backdrop-filter: blur(18px);
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
         }
 
-        .card {
-            background: #181818;
-            border-radius: 14px;
-            padding: 18px;
+        .brand, .profile, .nav a, .mini-credit {
+            border-radius: 8px;
         }
 
-        .title {
-            color: #1DB954;
-            font-size: 18px;
-            margin-bottom: 10px;
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 900;
         }
 
-        ul {
-            list-style: none;
-            padding: 0;
+        .brand-mark {
+            width: 48px;
+            height: 48px;
+            flex: 0 0 48px;
+            filter: drop-shadow(0 16px 30px rgba(30, 215, 96, 0.28));
         }
 
-        li {
-            padding: 6px 0;
-            border-bottom: 1px solid #2a2a2a;
-            font-size: 14px;
+        .brand-mark svg { width: 100%; height: 100%; display: block; }
+
+        .brand-text {
+            display: grid;
+            line-height: 1.04;
         }
 
-        .chart-box {
-            height: 320px;
-        }
-
-        canvas {
-            width: 100% !important;
-            height: 100% !important;
+        .brand-text small {
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 800;
+            margin-top: 4px;
         }
 
         .nav {
-            text-align: center;
-            margin-bottom: 20px;
+            display: grid;
+            gap: 8px;
         }
 
         .nav a {
-            color: #1DB954;
-            text-decoration: none;
-            margin: 0 10px;
+            color: var(--muted);
+            font-weight: 800;
+            padding: 12px 13px;
+        }
+
+        .nav a.active,
+        .nav a:hover {
+            background: var(--soft);
+            color: var(--ink);
+        }
+
+        .profile {
+            margin-top: auto;
+            border: 1px solid var(--line);
+            background: var(--soft);
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            min-width: 0;
+        }
+
+        .avatar, .cover, .artist-photo {
+            background:
+                linear-gradient(135deg, rgba(30, 215, 96, 0.55), rgba(139, 211, 255, 0.32)),
+                #182016;
+            overflow: hidden;
+        }
+
+        .avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            display: grid;
+            place-items: center;
+            color: #061009;
+            font-weight: 950;
+        }
+
+        .avatar img, .cover img, .artist-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .profile strong, .profile span {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .profile span { color: var(--muted); font-size: 12px; margin-top: 3px; }
+
+        .mini-credit {
+            color: var(--muted);
+            border: 1px solid var(--line);
+            padding: 12px;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .mini-credit strong { color: var(--ink); }
+
+        .main {
+            padding: 28px;
+            min-width: 0;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(34px, 5vw, 64px);
+            line-height: 0.96;
+            letter-spacing: 0;
+            max-width: 740px;
+        }
+
+        .subtle {
+            color: var(--muted);
+            margin-top: 9px;
+        }
+
+        .sync-line {
+            color: var(--muted);
+            margin-top: 9px;
+            min-height: 20px;
+        }
+
+        .button {
+            min-height: 42px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--soft);
+            padding: 0 14px;
+            font-weight: 900;
+            white-space: nowrap;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.12fr) minmax(300px, 0.88fr);
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .spotlight {
+            border: 1px solid rgba(30, 215, 96, 0.22);
+            border-radius: 8px;
+            background:
+                linear-gradient(135deg, rgba(30, 215, 96, 0.16), rgba(139, 211, 255, 0.08)),
+                rgba(19, 22, 18, 0.86);
+            padding: 18px;
+            display: grid;
+            grid-template-columns: 180px minmax(0, 1fr);
+            gap: 18px;
+            min-height: 230px;
+            box-shadow: 0 28px 90px rgba(0, 0, 0, 0.22);
+        }
+
+        .spotlight .cover {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            display: grid;
+            place-items: center;
+            color: rgba(6, 16, 9, 0.84);
+            font-size: 54px;
+            font-weight: 950;
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.32);
+        }
+
+        .eyebrow {
+            color: var(--mint);
+            font-size: 12px;
+            text-transform: uppercase;
+            font-weight: 950;
+            letter-spacing: 0.09em;
+        }
+
+        .spotlight h2 {
+            margin: 12px 0 8px;
+            font-size: clamp(28px, 4vw, 52px);
+            line-height: 1;
+            letter-spacing: 0;
+        }
+
+        .spotlight p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .stat {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: rgba(244, 241, 232, 0.06);
+            padding: 16px;
+        }
+
+        .stat span {
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 850;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .stat strong {
+            display: block;
+            margin-top: 10px;
+            font-size: 36px;
+            line-height: 1;
+        }
+
+        .section {
+            margin-top: 20px;
+        }
+
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            gap: 18px;
+            margin-bottom: 12px;
+        }
+
+        .section-head h2 {
+            margin: 0;
+            font-size: 22px;
+            letter-spacing: 0;
+        }
+
+        .section-head span { color: var(--muted); font-size: 13px; }
+
+        .track-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .track-card, .chart-card, .artist-card, .recent-panel {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--panel);
+            box-shadow: 0 18px 70px rgba(0, 0, 0, 0.16);
+        }
+
+        .track-card {
+            padding: 12px;
+            min-width: 0;
+        }
+
+        .track-card .cover {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            display: grid;
+            place-items: center;
+            color: rgba(6, 16, 9, 0.84);
+            font-size: 38px;
+            font-weight: 950;
+            margin-bottom: 12px;
+        }
+
+        .track-card strong,
+        .track-card span,
+        .artist-card strong,
+        .artist-card span,
+        .recent-copy strong,
+        .recent-copy span {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .track-card span,
+        .artist-card span,
+        .recent-copy span {
+            color: var(--muted);
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        .play-count {
+            color: var(--green);
+            font-size: 12px;
+            font-weight: 950;
+            margin-top: 10px;
+        }
+
+        .artist-strip {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .artist-card {
+            padding: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .artist-photo {
+            width: 62px;
+            height: 62px;
+            border-radius: 50%;
+            flex: 0 0 62px;
+            display: grid;
+            place-items: center;
+            color: rgba(6, 16, 9, 0.84);
+            font-size: 24px;
+            font-weight: 950;
+        }
+
+        .lower-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(320px, 0.72fr);
+            gap: 14px;
+            margin-top: 20px;
+        }
+
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .chart-card {
+            padding: 16px;
+            min-width: 0;
+        }
+
+        .chart-card h3 {
+            margin: 0 0 12px;
+            color: var(--muted);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .chart-card canvas {
+            width: 100% !important;
+            height: 245px !important;
+        }
+
+        .recent-panel {
+            padding: 16px;
+        }
+
+        .recent-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .recent-row {
+            display: grid;
+            grid-template-columns: 54px minmax(0, 1fr);
+            gap: 12px;
+            align-items: center;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: rgba(244, 241, 232, 0.045);
+            padding: 9px;
+        }
+
+        .recent-row .cover {
+            width: 54px;
+            height: 54px;
+            border-radius: 8px;
+            display: grid;
+            place-items: center;
+            color: rgba(6, 16, 9, 0.84);
+            font-weight: 950;
+        }
+
+        .empty {
+            border: 1px dashed var(--line);
+            border-radius: 8px;
+            color: var(--muted);
+            padding: 20px;
+            background: rgba(244, 241, 232, 0.035);
+        }
+
+        .site-footer {
+            border: 1px solid rgba(30, 215, 96, 0.22);
+            border-radius: 8px;
+            background:
+                linear-gradient(135deg, rgba(30, 215, 96, 0.13), rgba(139, 211, 255, 0.07)),
+                rgba(244, 241, 232, 0.05);
+            color: var(--ink);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-top: 22px;
+            padding: 18px 20px;
+            font-size: 14px;
+        }
+
+        .site-footer strong { color: var(--green); }
+
+        .footer-badge {
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            color: var(--muted);
+            padding: 7px 11px;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 1180px) {
+            .track-grid, .artist-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .hero-grid, .lower-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 900px) {
+            .app { grid-template-columns: 1fr; }
+            .sidebar {
+                position: static;
+                height: auto;
+                flex-direction: row;
+                align-items: center;
+                flex-wrap: wrap;
+            }
+            .profile { margin-left: auto; margin-top: 0; }
+            .mini-credit { display: none; }
+            .nav { display: flex; flex-wrap: wrap; }
+        }
+
+        @media (max-width: 680px) {
+            .main { padding: 18px; }
+            .topbar, .site-footer { flex-direction: column; align-items: flex-start; }
+            .spotlight { grid-template-columns: 1fr; }
+            .spotlight .cover { max-width: 220px; }
+            .track-grid, .artist-strip, .chart-grid, .stats { grid-template-columns: 1fr; }
+            .profile { width: 100%; margin-left: 0; }
         }
     </style>
 </head>
+<body data-csrf="{{ csrf_token }}">
+    <div class="app">
+        <aside class="sidebar">
+            <div class="brand">
+                <span class="brand-mark" aria-hidden="true">
+                    <svg viewBox="0 0 64 64" role="img">
+                        <defs>
+                            <linearGradient id="logoGradient" x1="10" y1="8" x2="54" y2="58">
+                                <stop stop-color="#1ed760"/>
+                                <stop offset="1" stop-color="#8bd3ff"/>
+                            </linearGradient>
+                        </defs>
+                        <rect width="64" height="64" rx="14" fill="url(#logoGradient)"/>
+                        <path d="M16 23c10-4 23-3 32 2" fill="none" stroke="#061009" stroke-width="4" stroke-linecap="round"/>
+                        <path d="M18 32c8-3 19-2 27 2" fill="none" stroke="#061009" stroke-width="4" stroke-linecap="round"/>
+                        <path d="M21 40c6-2 13-1 19 2" fill="none" stroke="#061009" stroke-width="4" stroke-linecap="round"/>
+                        <path d="M15 49h7l5-10 7 15 6-11h9" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
+                <span class="brand-text">Spotify Tracker<small>Listening diary</small></span>
+            </div>
+            <nav class="nav">
+                <a class="active" href="/">Dashboard</a>
+                <a href="/history">History</a>
+                <a href="/logout">Logout</a>
+            </nav>
+            <div class="profile">
+                <div class="avatar">
+                    {% if user.image_url %}
+                        <img src="{{ user.image_url }}" alt="">
+                    {% else %}
+                        {{ user.display_name[:1] }}
+                    {% endif %}
+                </div>
+                <div style="min-width: 0;">
+                    <strong>{{ user.display_name }}</strong>
+                    <span>Connected securely</span>
+                </div>
+            </div>
+            <div class="mini-credit">Private by design. Tokens stay server-side for this session.</div>
+        </aside>
 
-<body>
+        <main class="main">
+            <div class="topbar">
+                <div>
+                    <h1>Your music, remembered with texture.</h1>
+                    <div class="sync-line" id="syncStatus">Auto-sync enabled{% if last_sync_at %}. Last checked {{ last_sync_at }}{% endif %}.</div>
+                </div>
+                <a class="button" href="/">Refresh library</a>
+            </div>
 
-<div class="container">
+            <section class="hero-grid">
+                <div class="spotlight">
+                    <div class="cover">
+                        {% if hero_track and hero_track[3] %}
+                            <img src="{{ hero_track[3] }}" alt="">
+                        {% elif hero_track %}
+                            {{ hero_track[0][:1] }}
+                        {% else %}
+                            S
+                        {% endif %}
+                    </div>
+                    <div>
+                        <div class="eyebrow">Latest listen</div>
+                        {% if hero_track %}
+                            <h2>{{ hero_track[0] }}</h2>
+                            <p>{{ hero_track[1] }}{% if hero_track[5] %} from {{ hero_track[5] }}{% endif %}</p>
+                            <p>{{ hero_track[2] | listened_at }}</p>
+                        {% else %}
+                            <h2>No plays synced yet</h2>
+                            <p>Play something on Spotify, refresh the dashboard, and the page will start filling with your cover art and listening patterns.</p>
+                        {% endif %}
+                    </div>
+                </div>
 
-    <h1>🎧 Spotify Tracker Dashboard</h1>
+                <div class="stats">
+                    <div class="stat"><span>Total plays</span><strong>{{ total }}</strong></div>
+                    <div class="stat"><span>Unique songs</span><strong>{{ songs }}</strong></div>
+                    <div class="stat"><span>Artists</span><strong>{{ artists }}</strong></div>
+                </div>
+            </section>
 
-    <div class="nav">
-        <a href="/">Dashboard</a>
-        <a href="/history">History</a>
+            <section class="section">
+                <div class="section-head">
+                    <h2>Tracks that keep coming back</h2>
+                    <span>Album art pulled from Spotify</span>
+                </div>
+                <div class="track-grid">
+                    {% for track in top_tracks[:4] %}
+                        <article class="track-card">
+                            <div class="cover">
+                                {% if track[3] %}
+                                    <img src="{{ track[3] }}" alt="">
+                                {% else %}
+                                    {{ track[0][:1] }}
+                                {% endif %}
+                            </div>
+                            <strong>{{ track[0] }}</strong>
+                            <span>{{ track[1] }}</span>
+                            <div class="play-count">{{ track[2] }} plays</div>
+                        </article>
+                    {% else %}
+                        <div class="empty">Your top tracks will appear here after Spotify syncs recent plays.</div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <section class="section">
+                <div class="section-head">
+                    <h2>Artists in rotation</h2>
+                    <span>Portraits use the primary Spotify artist</span>
+                </div>
+                <div class="artist-strip">
+                    {% for artist in top_artists[:4] %}
+                        <article class="artist-card">
+                            <div class="artist-photo">
+                                {% if artist[2] %}
+                                    <img src="{{ artist[2] }}" alt="">
+                                {% else %}
+                                    {{ artist[0][:1] }}
+                                {% endif %}
+                            </div>
+                            <div style="min-width: 0;">
+                                <strong>{{ artist[0] }}</strong>
+                                <span>{{ artist[1] }} plays</span>
+                            </div>
+                        </article>
+                    {% else %}
+                        <div class="empty">Artist portraits will appear here after your next sync.</div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <section class="lower-grid">
+                <div class="chart-grid">
+                    <div class="chart-card">
+                        <h3>Top tracks</h3>
+                        <canvas id="tracksChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Daily plays</h3>
+                        <canvas id="dailyChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Top artists</h3>
+                        <canvas id="artistsChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Listening hours</h3>
+                        <canvas id="hourlyChart"></canvas>
+                    </div>
+                </div>
+
+                <aside class="recent-panel">
+                    <div class="section-head">
+                        <h2>Recent plays</h2>
+                        <span><a href="/history">Open history</a></span>
+                    </div>
+                    <div class="recent-list">
+                        {% for song, artist, time, album_image, artist_image, album in recent %}
+                            <div class="recent-row">
+                                <div class="cover">
+                                    {% if album_image %}
+                                        <img src="{{ album_image }}" alt="">
+                                    {% else %}
+                                        {{ song[:1] }}
+                                    {% endif %}
+                                </div>
+                                <div class="recent-copy">
+                                    <strong>{{ song }}</strong>
+                                    <span>{{ artist }} &middot; {{ time | listened_at }}</span>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="empty">No recent plays yet.</div>
+                        {% endfor %}
+                    </div>
+                </aside>
+            </section>
+
+            <footer class="site-footer">
+                <span>Made, designed and developed by <strong>Iliass Khalki</strong>.</span>
+                <span class="footer-badge">Spotify Tracker</span>
+            </footer>
+        </main>
     </div>
 
-    <!-- STATS -->
-    <div class="stats">
-        <div class="stat">
-            <div class="stat-number">{{ total }}</div>
-            <div>Total Plays</div>
-        </div>
+    <script>
+        const csrfToken = document.body.dataset.csrf;
+        const syncStatus = document.getElementById("syncStatus");
 
-        <div class="stat">
-            <div class="stat-number">{{ songs }}</div>
-            <div>Unique Songs</div>
-        </div>
+        async function runAutoSync() {
+            if (document.hidden || !csrfToken) return;
 
-        <div class="stat">
-            <div class="stat-number">{{ artists }}</div>
-            <div>Unique Artists</div>
-        </div>
-    </div>
+            try {
+                const response = await fetch("/api/sync", {
+                    method: "POST",
+                    credentials: "same-origin",
+                    headers: { "X-CSRF-Token": csrfToken }
+                });
 
-    <div class="grid">
+                if (response.status === 401) {
+                    window.location.href = "/login";
+                    return;
+                }
 
-        <!-- TOP TRACKS -->
-        <div class="card">
-            <div class="title">🔥 Top Tracks</div>
-            <ul>
-                {% for song, artist, count in top_tracks %}
-                    <li>{{ song }} - {{ artist }} ({{ count }})</li>
-                {% endfor %}
-            </ul>
-        </div>
+                if (!response.ok) throw new Error("sync failed");
 
-        <!-- TOP ARTISTS -->
-        <div class="card">
-            <div class="title">🎤 Top Artists</div>
-            <ul>
-                {% for artist, count in top_artists %}
-                    <li>{{ artist }} ({{ count }})</li>
-                {% endfor %}
-            </ul>
-        </div>
+                const payload = await response.json();
+                const checkedAt = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
-        <!-- TRACKS CHART -->
-        <div class="card chart-box">
-            <div class="title">📊 Top Tracks Chart</div>
-            <canvas id="tracksChart"></canvas>
-        </div>
-
-        <!-- DAILY CHART -->
-        <div class="card chart-box">
-            <div class="title">📅 Daily Listening (Last 7 days)</div>
-            <canvas id="dailyChart"></canvas>
-        </div>
-
-        <!-- HOURLY CHART -->
-        <div class="card chart-box">
-            <div class="title">🕒 Hourly Listening Pattern</div>
-            <canvas id="hourlyChart"></canvas>
-        </div>
-
-    </div>
-
-</div>
-
-<script>
-/* ---------------- TOP TRACKS ---------------- */
-const tracksCtx = document.getElementById("tracksChart");
-
-new Chart(tracksCtx, {
-    type: "bar",
-    data: {
-        labels: {{ track_labels | tojson }},
-        datasets: [{
-            label: "Plays",
-            data: {{ track_values | tojson }},
-            backgroundColor: "#1DB954"
-        }]
-    },
-    options: {
-    responsive: true,
-    maintainAspectRatio: false,
-
-    scales: {
-        x: {
-            ticks: {
-                maxRotation: 25,
-                minRotation: 25
+                if (payload.synced > 0) {
+                    syncStatus.textContent = `Updated ${payload.synced} listening records. Refreshing the dashboard...`;
+                    window.setTimeout(() => window.location.reload(), 700);
+                } else {
+                    syncStatus.textContent = `Auto-sync checked at ${checkedAt}.`;
+                }
+            } catch (error) {
+                syncStatus.textContent = "Auto-sync paused. Refresh to retry.";
             }
         }
-    }
-}
-});
 
+        window.setTimeout(runAutoSync, 15000);
+        window.setInterval(runAutoSync, 45000);
 
-/* ---------------- DAILY CHART ---------------- */
-const dailyCtx = document.getElementById("dailyChart");
+        function loadChartJs() {
+            return new Promise((resolve) => {
+                if (window.Chart) {
+                    resolve(true);
+                    return;
+                }
 
-new Chart(dailyCtx, {
-    type: "line",
-    data: {
-        labels: {{ daily_labels | tojson }},
-        datasets: [{
-            label: "Daily Plays",
-            data: {{ daily_values | tojson }},
-            borderColor: "#1DB954",
-            fill: false
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false
-    }
-});
+                const script = document.createElement("script");
+                const timeout = window.setTimeout(() => resolve(false), 2500);
 
+                script.src = "https://cdn.jsdelivr.net/npm/chart.js";
+                script.async = true;
+                script.onload = () => {
+                    window.clearTimeout(timeout);
+                    resolve(true);
+                };
+                script.onerror = () => {
+                    window.clearTimeout(timeout);
+                    resolve(false);
+                };
 
-/* ---------------- HOURLY CHART ---------------- */
-const hourlyCtx = document.getElementById("hourlyChart");
+                document.head.appendChild(script);
+            });
+        }
 
-new Chart(hourlyCtx, {
-    type: "bar",
-    data: {
-        labels: {{ hourly_labels | tojson }},
-        datasets: [{
-            label: "Hourly Plays",
-            data: {{ hourly_values | tojson }},
-            backgroundColor: "#1DB954"
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false
-    }
-});
-</script>
+        async function renderCharts() {
+            if (!await loadChartJs() || !window.Chart) return;
 
+            Chart.defaults.color = "#a9ad9e";
+            Chart.defaults.borderColor = "rgba(244, 241, 232, 0.1)";
+            Chart.defaults.font.family = "Inter, system-ui, sans-serif";
+
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { ticks: { maxRotation: 0, autoSkip: true }, grid: { display: false } },
+                    y: { beginAtZero: true, ticks: { precision: 0 } }
+                }
+            };
+
+            new Chart(document.getElementById("tracksChart"), {
+                type: "bar",
+                data: {
+                    labels: {{ track_labels | tojson }},
+                    datasets: [{ data: {{ track_values | tojson }}, backgroundColor: "#1ed760", borderRadius: 7 }]
+                },
+                options: chartOptions
+            });
+
+            new Chart(document.getElementById("artistsChart"), {
+                type: "bar",
+                data: {
+                    labels: {{ top_artists | map(attribute=0) | list | tojson }},
+                    datasets: [{ data: {{ top_artists | map(attribute=1) | list | tojson }}, backgroundColor: "#8bd3ff", borderRadius: 7 }]
+                },
+                options: chartOptions
+            });
+
+            new Chart(document.getElementById("dailyChart"), {
+                type: "line",
+                data: {
+                    labels: {{ daily_labels | tojson }},
+                    datasets: [{
+                        data: {{ daily_values | tojson }},
+                        borderColor: "#f7c66a",
+                        backgroundColor: "rgba(247, 198, 106, 0.16)",
+                        fill: true,
+                        tension: 0.36
+                    }]
+                },
+                options: chartOptions
+            });
+
+            new Chart(document.getElementById("hourlyChart"), {
+                type: "line",
+                data: {
+                    labels: {{ hourly_labels | tojson }},
+                    datasets: [{
+                        data: {{ hourly_values | tojson }},
+                        borderColor: "#ff8aa6",
+                        backgroundColor: "rgba(255, 138, 166, 0.13)",
+                        fill: true,
+                        tension: 0.36
+                    }]
+                },
+                options: chartOptions
+            });
+        }
+
+        renderCharts();
+    </script>
 </body>
 </html>
